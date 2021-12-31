@@ -34,3 +34,6 @@ Welcome to Project Akio, here we write the stuff that makes the bot's gears runn
 ### **Contributing:**
 Yes, I would absolutely love even the smallest of contirbutions to the biggest.
 Currently.
+
+### **Contributor:**
+[Koala](https://GitHub.com/koala9712)
