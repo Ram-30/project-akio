@@ -1,7 +1,7 @@
 ## <h1 align="center">Akio</h1>
 
 ### **Something:**
-Welcome to akio's home, here we write the stuff that makes the bot's gears running smoothly.
+Welcome to Project Akio, here we write the stuff that makes the bot's gears running smoothly.
 
 ### **Features:**
 - Current:
@@ -17,7 +17,7 @@ Welcome to akio's home, here we write the stuff that makes the bot's gears runni
     - Nextcord
     - More soon
 - Database
-    - sqlite3, driven by aiosqlite
+    - mongodb
 - API's
     - None, as of now.
 
@@ -33,6 +33,4 @@ Welcome to akio's home, here we write the stuff that makes the bot's gears runni
 
 ### **Contributing:**
 Yes, I would absolutely love even the smallest of contirbutions to the biggest.
-Currently, there is only one co-developer, but I'd like to take this opportunity to thank all the people who worked with us from behind the scenes.
-- [koala9712](https://https://github.com/koala9712/)
-    - Discord: Koala#9712
+Currently.
