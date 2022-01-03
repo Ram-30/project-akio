@@ -51,7 +51,7 @@ class AFK(commands.Cog):
             await msg.channel.send(f"Welcome back {msg.author.mention}, I removed your AFK.",delete_after=5)
 
     @slash_command(name="afk",description="Let other know you are afk when you get pinged")
-    async def afk(self, interaction, arg1=SlashOption(name="input", description="This message shows when someone pings you")):
+    async def afk(self, interaction : Interaction, message=SlashOption(name="input", description="This message shows when someone pings you")):
         with open("afk.json", "r") as file:
             afk = json.load(file)
 
