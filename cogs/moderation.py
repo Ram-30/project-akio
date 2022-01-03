@@ -12,19 +12,12 @@ from discord_slash.utils.manage_commands import create_option
 from discord_components import DiscordComponents, Button
 from discord_slash import cog_ext, SlashContext
 
-
 class Moderation(commands.Cog):
-
     def __init__(self, bot):
-      self.bot = bot
-      
-      bot.embed_color = 0x69EBE4
-      bot.error_color = 0xED4245
-    
-    
-      
-      
-      
+        self.bot = bot
+        bot.embed_color = 0x69EBE4
+        bot.error_color = 0xED4245
+
     @cog_ext.cog_slash(name="mute", description="mute a user in the server",options=[create_option(name="member", description="Mention the user you want to mute",option_type=6,required=True)])
     @commands.guild_only()
     @commands.has_permissions(kick_members=True)
