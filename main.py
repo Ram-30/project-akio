@@ -23,9 +23,9 @@ bot.remove_command("help")
 
 @tasks.loop(seconds=30)
 async def status_change():
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=(f"{len(bot.users)} members | {len(bot.guilds)} servers")))     
+    await bot.change_presence(activity=nextcord.Activity(type=nextcord.ActivityType.watching, name=(f"{len(bot.users)} members | {len(bot.guilds)} servers")))     
     await asyncio.sleep(30)
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening,name=(">help")))
+    await bot.change_presence(activity=nextcord.Activity(type=nextcord.ActivityType.listening,name=("/help")))
 
 @bot.event 
 async def on_ready():
@@ -53,7 +53,7 @@ async def on_message(message):
         return await ctx.send(embed=embed)
     await bot.process_commands(message) 
 
-@slash.slash(
+@bot.slash_command(
     name="translate",
     description="Translate something (beta)",
     options=
@@ -77,8 +77,8 @@ async def translate(ctx,to , message:str):
   a = t.translate(text=message,dest=to)
   await ctx.send(a.text)
 
-@slash.slash(name="help", description="View the help page",options=[create_option(name="args", description="Module name",option_type=3 ,required=False)])
-async def help(ctx, args=None):
+@bot.slash_command(name="help", description="View the help page")
+async def help(int , args=SlashOption(name="args", description="Provide a module/command name",required=False)):
   help_embed = discord.Embed(title="Akio help command", color = 0x69EBE4)
   #command_names_list 
   for _command in bot.slash.commands:
@@ -89,7 +89,7 @@ async def help(ctx, args=None):
 
     # If there are no arguments, just list the commands:
   if not args:
-    help_embed= discord.Embed(description=(f"[Invite me](https://discord.com/api/oauth2/authorize?client_id=732119152885497867&permissions=8&scope=bot) | [Support Server](https://discord.gg/5yeY36GnGS) | [Upvote](https://top.gg/bot/732119152885497867/vote)\nAll the modules of the bot are listed below"), color = 0x69EBE4)
+    help_embed= nextcord.Embed(description=(f"[Invite me](https://discord.com/api/oauth2/authorize?client_id=732119152885497867&permissions=8&scope=bot) | [Support Server](https://discord.gg/5yeY36GnGS) | [Upvote](https://top.gg/bot/732119152885497867/vote)\nAll the modules of the bot are listed below"), color = 0x69EBE4)
     #help_embed.add_field(name="<:music:847767269899370538> Music",value=f"Type **`>help music`**")
     help_embed.add_field(name=" <:mod:847767322156335135> Moderation Commands",value=f"Type **`>help mod`**")
     help_embed.add_field(name=" <:fun:847767372400295946> Fun commands",value=f"Type **`>help fun`**")
@@ -102,7 +102,7 @@ async def help(ctx, args=None):
     
     help_embed.set_footer(text="Akio® | Made by NotGizzy#9481",icon_url="https://media.discordapp.net/attachments/869491746067865611/887991450170687518/20210916_144928.png")
     help_embed.set_thumbnail(url="https://media.discordapp.net/attachments/867648204279513088/887994311218724874/20210916_091654.png")
-    await ctx.send(embed=help_embed)
+    await interaction.response.send_message(embed=help_embed)
  
   #elif args == "music":
     #help_embed.add_field(name="<:play_cyan:847975009342193704> Play",value ="`Request a song and add it to queue`")
@@ -115,7 +115,7 @@ async def help(ctx, args=None):
     #help_embed.add_field(name="<:summon_cyan:847975080848130049> Summon",value ="`Summon the bot to vc`")
     
     #help_embed.set_footer(text=f"Type `>help <command name>` for more details about a command.")
-    #await ctx.send(embed=help_embed)
+    #await interaction.response.send_message(embed=help_embed)
   
   elif args == "utility":
     help_embed.add_field(name="<:Snow_info:847853879542022144> ServerInfo",value ="`Get information about the server`")
@@ -131,7 +131,7 @@ async def help(ctx, args=None):
     help_embed.add_field(name="<:embed_add:858614012190785546> embed",value="Interactive embed Creator")
     help_embed.add_field(name="<:magnify_glass:858332516775624704> Role",value ="`Get Information about a role`")
     help_embed.set_footer(text=f"Type `>help <command name>` for more details about a command.")
-    await ctx.send(embed=help_embed)
+    await interaction.response.send_message(embed=help_embed)
   
   elif args == "fun":
     help_embed.add_field(name="<:hugie:847962984243265568> Hug",value ="`Give a user virtual hug`")
@@ -169,7 +169,7 @@ async def help(ctx, args=None):
 
 
     help_embed.set_footer(text=f"Type `>help <command name>` for more details about a command.")
-    await ctx.send(embed=help_embed)
+    await interaction.response.send_message(embed=help_embed)
     
   elif args == "mod":
     help_embed.add_field(name="<:nickname:848436062845927435> Nickname",value ="`Change nick of a user`")
@@ -184,7 +184,7 @@ async def help(ctx, args=None):
     help_embed.add_field(name="<:remove_role:848436089088901141> takerole",value ="`Remove a role from user`")
     
     help_embed.set_footer(text=f"Type `>help <command name>` for more details about a command.")
-    await ctx.send(embed=help_embed)
+    await interaction.response.send_message(embed=help_embed)
   
   elif args == "info":
     #help_embed.add_field(name="<:xs_prefix:848442391018864650> setprefix",value ="`Change the bot prefix for this server`")
@@ -198,7 +198,7 @@ async def help(ctx, args=None):
  
     
     help_embed.set_footer(text=f"Type `>help <command name>` for more details about a command.")
-    await ctx.send(embed=help_embed)
+    await interaction.response.send_message(embed=help_embed)
   
   
   
@@ -217,13 +217,13 @@ async def help(ctx, args=None):
     help_embed.add_field(
     name="Usage",
     value=f"```>{bot.get_command(args).usage}```")
-    await ctx.send(embed=help_embed,hidden=True)
+    await interaction.response.send_message(embed=help_embed,hidden=True)
 
  
     
  
   #elif args in bot.cogs :
-    #emb = discord.Embed(title=f'{args} - Commands',color=discord.Color.green())
+    #emb = nextcord.Embed(title=f'{args} - Commands',color=discord.Color.green())
 
                     # getting commands from cog
     #for command in bot.get_cog(args).get_commands():
@@ -236,20 +236,20 @@ async def help(ctx, args=None):
     help_embed.add_field(
     name="No command found",
     value=f"I dont have a command/module named {args}!")
-    await ctx.send(embed=help_embed,hidden=True)
+    await interaction.response.send_message(embed=help_embed,hidden=True)
 
 
 
   
-@slash.slash(name="stats", description="Get the bots stats")
-async def stats(ctx):
+@bot.slash_command(name="stats", description="Get the bots stats")
+async def stats(interaction):
   """Get the current stats of bot"""
   process = psutil.Process(os.getpid())
   embed = discord.Embed(title="Bot info",color=0x69EBE4, description=(f"<:Xarvis_dev:847776388484038696> Developers: **NotGizzy#9481**\n\n<:ONLINE:847786717176135690> Live in: **{len(bot.guilds)} **Servers \n\n<a:loading:847421396984135680> Memory usage: **{round(process.memory_info().rss/1024/1024) *1}** mb! \n\n<:desktop_screen:847785552144629821> Cpu usage: **{psutil.cpu_percent()}**% \n\n<:waves:847767252979154944> Ram usage: **{psutil.virtual_memory().percent}**%\n\n<:latency:847781207999905802> Bot latency: **{round(bot.latency * 1000)}** ms\n\n<:Snow_info:847853879542022144> Version\: `0.4.2`"))
   embed.set_footer(text="Akio Copyright 2021®",icon_url=ctx.author.avatar_url)
   embed.set_thumbnail(url="https://media.discordapp.net/attachments/867648204279513088/887994311218724874/20210916_091654.png")
     
-  await ctx.send(embed=embed)
+  await interaction.response.send_message(embed=embed)
   
   
       
@@ -309,14 +309,14 @@ async def unload(ctx, extension):
    bot.unload_extension(f'cogs.{extension}')
    await ctx.send(f'Succesfully unloaded **{extension}** module')
 
-@slash.slash(name="Reload", description="Reaload a cog file",options=[create_option(name="cog", description="type a cog name",option_type=3,required=True)],guild_ids=dev)
+@bot.slash_command(name="Reload", description="Reaload a cog file")
 @commands.is_owner()
-async def _reload(ctx, cog: str):
+async def _reload(interaction, cog: str = SlashOption(name="cog", description="Provide a cog name", required=True)):
   try: 
     bot.reload_extension(f'cogs.{cog}')
     await ctx.send(content=f'🔃 Succesfully reloaded **{cog}** module')
-  except discord_slash.error.CheckFailure as e:
-    await ctx.send(f"{e} Only the bot dev can execute this command")
+  except nextcord_slash.error.CheckFailure as e:
+    await interaction.response.send_message(f"{e} Only the bot dev can execute this command")
 
 async def startup():
     for filename in os.listdir('./cogs'):
