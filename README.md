@@ -20,7 +20,8 @@ Welcome to Project Akio, here we write the stuff that makes the bot's gears runn
     - mongodb
 - API's
     - AlexFlipNote
-    - Neko.xyz
+    - Nekobot.xyz
+    - Nekoslife 
 
 ### **Self-Hosting:**
 - Pre-requisites
