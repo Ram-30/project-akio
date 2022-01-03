@@ -38,4 +38,5 @@ Yes, I would absolutely love even the smallest of contirbutions to the biggest.
 Currently.
 
 ### **Contributors:**
-[Koala](https://GitHub.com/koala9712)
+- [Koala](https://GitHub.com/koala9712)
+- [Insidous](https://GitHub.com/insidiousthedev)
