@@ -5,7 +5,7 @@ Welcome to Project Akio, here we write the stuff that makes the bot's gears runn
 
 ### **Features:**
 - Current:
-    - Some stuff like music, fun, moderation, etc
+    - Some stuff like fun, moderation,image manipulation etc
 - Under Construction:
     - Re-write (Stuff is messed up right now.)
     - System Backend
@@ -19,7 +19,9 @@ Welcome to Project Akio, here we write the stuff that makes the bot's gears runn
 - Database
     - mongodb
 - API's
-    - None, as of now.
+    - AlexFlipNote
+    - Nekobot.xyz
+    - Nekoslife 
 
 ### **Self-Hosting:**
 - Pre-requisites
