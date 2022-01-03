@@ -79,7 +79,7 @@ async def translate(ctx,to , message:str):
 
 @bot.slash_command(name="help", description="View the help page")
 async def help(int , args=SlashOption(name="args", description="Provide a module/command name",required=False)):
-  help_embed = discord.Embed(title="Akio help command", color = 0x69EBE4)
+  help_embed = nextcord.Embed(title="Akio help command", color = 0x69EBE4)
   #command_names_list 
   for _command in bot.slash.commands:
     if _command == 'context':
