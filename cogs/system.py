@@ -1,5 +1,5 @@
-import discord
-from discord.ext import commands
+import nextcord
+from nextcord.ext import commands
 import json
 import requests
 import aiohttp
@@ -10,14 +10,8 @@ import disputils
 from disputils import BotEmbedPaginator ,BotConfirmation
 import os
 import asyncio
-from discord_components import *
 import random
-import discord_slash
-from discord_slash.utils.manage_commands import create_option
 
-from discord_components import DiscordComponents, Button
-
-from discord_slash import cog_ext, SlashContext
 
 class system(commands.Cog):
     def __init__(self, bot):
@@ -27,8 +21,7 @@ class system(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-      DiscordComponents(self.bot)
-      print("All systems online")
+      print("System Cog Ready")
 
     @commands.Cog.listener()
     async def on_member_join(self,member):
@@ -38,43 +31,9 @@ class system(commands.Cog):
         e.set_footer(text="Akio Development Team",icon_url="https://media.discordapp.net/attachments/869491746067865611/887991450170687518/20210916_144928.png")
         m= self.bot.get_channel(848432507699724298)
         await m.send(embed=e)
-
-  
-    
-    @commands.command()
-    @commands.is_owner()
-    async def select(self,ctx):
-      m = await ctx.send("Please select ",components=[Select(placeholder="Click here for options!",options=[SelectOption(label="Test1", value="Gay"), SelectOption(label="Test2", value="Verygay")],disabled=False,)],)
-      def check(i):
-        return i.user.id == ctx.author.id 
-  
-      try:
-      
-        interaction = await self.bot.wait_for("select_option",check=check,timeout=10.0)
-        await interaction.respond(content=f"{interaction.component[0].label} selected!", ephemeral=False)
-      except asyncio.TimeoutError:
-         # await m.edit(embed=e)
-        await m.edit("Timeout",components=[Select(placeholder="Selection time out", options=[SelectOption(label="X",value="X")],disabled=True,)],)
-          #await m.delete()
-        return
-
-
-   
       
        
-    @commands.command()
-    @commands.is_owner()
-    async def button(self,ctx):
-      await ctx.send(
-        "Hello, World!",
-        components = [
-            Button(label = "Primary Button Test",style=5)
-        ]
-      )
 
-      interaction = await self.bot.wait_for("button_click", check = lambda i: i.component.label.startswith("Primary"))
-      await interaction.respond(content = "You Clicked This button and i responded as a normal message ",ephemeral=False)
-      
     @commands.command()
     @commands.is_owner()
     async def votecheck(self,ctx,user: discord.Member):
@@ -115,7 +74,7 @@ class system(commands.Cog):
     @commands.command(aliases=["restart"],hidden=True)
     @commands.is_owner()
     async def reboot(self,ctx):
-      extensions = ['cogs.DL' , 'cogs.fun' , 'cogs.image' , 'cogs.moderation' , 'cogs.utils' ,'cogs.nsfw']
+      extensions = ['cogs.DL' , 'cogs.fun' , 'cogs.image' , 'cogs.moderation' , 'cogs.utils' ]
       try:
         m = await ctx.send("<a:warn:738717144518361149> Restarting bot!", delete_after=10)
         for extension in extensions:
@@ -151,12 +110,10 @@ class system(commands.Cog):
           
        
 
-    @cog_ext.cog_slash(name="ping", description="Bot latency ping")
-   
-    async def ping(self, ctx):
-        """Bot latency ping  """
+    @nextcord.slash_command(name="ping", description="Bot latency ping")
+    async def ping(self, ctx, interaction: Interaction):
         PingEmbed = discord.Embed(color=discord.Color.green(), title='Pong! 🏓', description=(f'{round(self.bot.latency * 1000)} ms'))
-        await ctx.send(embed=PingEmbed)
+        await interaction.send_message(embed=PingEmbed)
      
         
   
