@@ -1,9 +1,9 @@
 from nextcord.ext import commands
 from nextcord.ext import tasks
 from nextcord import Client, Interaction, SlashOption
-
+import aiohttp
 import config
-
+import keep_alive
 import os
 import nextcord
 import asyncio
@@ -20,7 +20,7 @@ bot = commands.Bot(
     intents=intents
     )
 bot.remove_command("help")
-
+#bot = Client()
 @tasks.loop(seconds=30)
 async def status_change():
     await bot.change_presence(activity=nextcord.Activity(type=nextcord.ActivityType.watching, name=(f"{len(bot.users)} members | {len(bot.guilds)} servers")))     
@@ -50,42 +50,22 @@ async def on_message(message):
             color=nextcord.Color.blurple())
 
         embed.set_footer(text="Akio development team", icon_url= bot.user.avatar.url)
-        return await ctx.send(embed=embed)
+        return await  message.channel.send(embed=embed)
     await bot.process_commands(message) 
 
-@bot.slash_command(
-    name="translate",
-    description="Translate something (beta)",
-    options=
-        [
-            create_option(
-                name="to",
-                description="Translate to which language",
-                option_type=3, 
-                required=True
-            ),
-            create_option(
-                name="message",
-                description="text to translate",
-                option_type=3,
-                required=True
-            )
-        ]
-    )
-async def translate(ctx,to , message:str):
-  t = Translator()
-  a = t.translate(text=message,dest=to)
-  await ctx.send(a.text)
+for filename in os.listdir('./cogs'):
+         if filename.endswith('.py') and not filename.startswith("_"):
+            try:
+                bot.load_extension(f'cogs.{filename[:-3]}')
+                print(f'Loaded {filename[:-3]}')
+            except Exception as e:
+                print(f'Faield to load {filename[:-3]} due to {e}')
 
 @bot.slash_command(name="help", description="View the help page")
-async def help(int , args=SlashOption(name="args", description="Provide a module/command name",required=False)):
+async def help(interaction , args=SlashOption(name="args", description="Provide a module/command name",required=False)):
   help_embed = nextcord.Embed(title="Akio help command", color = 0x69EBE4)
-  #command_names_list 
-  for _command in bot.slash.commands:
-    if _command == 'context':
-      continue
-    command_names_list = bot.slash.commands[_command]
-  #[x.name for x in bot.slash.commands]
+  command_names_list = [x.name for x in bot.commands_slash]
+
 
     # If there are no arguments, just list the commands:
   if not args:
@@ -104,18 +84,6 @@ async def help(int , args=SlashOption(name="args", description="Provide a module
     help_embed.set_thumbnail(url="https://media.discordapp.net/attachments/867648204279513088/887994311218724874/20210916_091654.png")
     await interaction.response.send_message(embed=help_embed)
  
-  #elif args == "music":
-    #help_embed.add_field(name="<:play_cyan:847975009342193704> Play",value ="`Request a song and add it to queue`")
-    #help_embed.add_field(name="<:pause_cyan:847974989835141140> Pause",value ="`Pause the currently playing song`")
-   # help_embed.add_field(name="<:stop_cyan:847975057493983253> Stop",value ="`Stop playing and disconnects bot from vc`")
-  #  help_embed.add_field(name="<:skip_cyan:847975041924071426> Skip",value ="`Skip the current song`")
-    #help_embed.add_field(name="<:queue_cyan:847975026421399572> queue",value ="`Get the list of songs queued`")
-   # help_embed.add_field(name="<:current_cyan:847976319529517138> Current",value ="`Get information about currently playing song`")
-   # help_embed.add_field(name="<:volume_cyan:847976059600109628> Volume",value ="`Change the volume of the player`")
-    #help_embed.add_field(name="<:summon_cyan:847975080848130049> Summon",value ="`Summon the bot to vc`")
-    
-    #help_embed.set_footer(text=f"Type `>help <command name>` for more details about a command.")
-    #await interaction.response.send_message(embed=help_embed)
   
   elif args == "utility":
     help_embed.add_field(name="<:Snow_info:847853879542022144> ServerInfo",value ="`Get information about the server`")
@@ -217,26 +185,19 @@ async def help(int , args=SlashOption(name="args", description="Provide a module
     help_embed.add_field(
     name="Usage",
     value=f"```>{bot.get_command(args).usage}```")
-    await interaction.response.send_message(embed=help_embed,hidden=True)
+    await interaction.response.send_message(embed=help_embed,emerphal=True)
 
  
     
  
-  #elif args in bot.cogs :
-    #emb = nextcord.Embed(title=f'{args} - Commands',color=discord.Color.green())
-
-                    # getting commands from cog
-    #for command in bot.get_cog(args).get_commands():
-      #if not command.hidden:
-       # help_embed.add_field(name=f"`{command.name}`", value=command.help, inline=False)
-       # await ctx.send(embed=help_embed)
-      #break 
+  
+                    
     # If someone is just trolling:
   else:
     help_embed.add_field(
     name="No command found",
     value=f"I dont have a command/module named {args}!")
-    await interaction.response.send_message(embed=help_embed,hidden=True)
+    await interaction.response.send_message(embed=help_embed,emerphal=True)
 
 
 
@@ -245,100 +206,46 @@ async def help(int , args=SlashOption(name="args", description="Provide a module
 async def stats(interaction):
   """Get the current stats of bot"""
   process = psutil.Process(os.getpid())
-  embed = discord.Embed(title="Bot info",color=0x69EBE4, description=(f"<:Xarvis_dev:847776388484038696> Developers: **NotGizzy#9481**\n\n<:ONLINE:847786717176135690> Live in: **{len(bot.guilds)} **Servers \n\n<a:loading:847421396984135680> Memory usage: **{round(process.memory_info().rss/1024/1024) *1}** mb! \n\n<:desktop_screen:847785552144629821> Cpu usage: **{psutil.cpu_percent()}**% \n\n<:waves:847767252979154944> Ram usage: **{psutil.virtual_memory().percent}**%\n\n<:latency:847781207999905802> Bot latency: **{round(bot.latency * 1000)}** ms\n\n<:Snow_info:847853879542022144> Version\: `0.4.2`"))
-  embed.set_footer(text="Akio Copyright 2021®",icon_url=ctx.author.avatar_url)
+  embed = nextcord.Embed(title="Bot info",color=0x69EBE4, description=(f"<:Xarvis_dev:847776388484038696> Developers: **NotGizzy#9481**\n\n<:ONLINE:847786717176135690> Live in: **{len(bot.guilds)} **Servers \n\n<a:loading:847421396984135680> Memory usage: **{round(process.memory_info().rss/1024/1024) *1}** mb! \n\n<:desktop_screen:847785552144629821> Cpu usage: **{psutil.cpu_percent()}**% \n\n<:waves:847767252979154944> Ram usage: **{psutil.virtual_memory().percent}**%\n\n<:latency:847781207999905802> Bot latency: **{round(bot.latency * 1000)}** ms\n\n<:Snow_info:847853879542022144> Version\: `0.4.2`"))
+  embed.set_footer(text="Akio Copyright 2021®",icon_url=interaction.user.avatar)
   embed.set_thumbnail(url="https://media.discordapp.net/attachments/867648204279513088/887994311218724874/20210916_091654.png")
     
   await interaction.response.send_message(embed=embed)
   
-  
-      
 
-#error handler ↓
+@bot.slash_command(name="load", description="load a cog file")
+@commands.is_owner()
+async def load(int, extension=SlashOption (name="extension", description="Provide a cog name", required=True)):
+   bot.load_extension(f'cogs.{extension}')
+   await int.response.send_message(f'Succesfully loaded **{extension}** module')
+
+  
+@bot.slash_command(name="unload", description="unload a cog file")
+@commands.is_owner()
+async def unload(int, extension=SlashOption (name="extension", description="Provide a cog name", required=True)):
+   bot.unload_extension(f'cogs.{extension}')
+   await int.response.send_message(f'Succesfully unloaded **{extension}** module')
+
+@bot.slash_command(name="reload", description="Reaload a cog file")
+@commands.is_owner()
+async def reload(interaction, cog: str = SlashOption(name="cog", description="Provide a cog name", required=True)):
+  bot.reload_extension(f'cogs.{cog}')
+  await interaction.response.send_message(content=f'🔃 Succesfully reloaded **{cog}** module')
+  
+
 
 @bot.event
 async def on_command_error(ctx, error):
   if isinstance(error, commands.CommandOnCooldown):
      msg = 'This command is on cooldown, please try again in {:.2f}s'.format(error.retry_after)
-     em = discord.Embed(title = "<:slowmode_time:862601700807933952> Cooldown", description = msg ,colour=0x69EBE4 )
+     em = nextcord.Embed(title = "<:slowmode_time:862601700807933952> Cooldown", description = msg ,colour=0x69EBE4 )
      await ctx.send (embed = em)
   
-  #elif isinstance(error, commands.CommandInvokeError):
-    #if hasattr(ctx.command, 'on_error'):
-      #return
-
-    #e = discord.Embed(title="<:broken_circle:847776660174274580> Beep Boop Beep!", description=f"An unexpected error occurred executing **__{ctx.command.name}__**\n\nIf this issue persists we advise you to report this error",color=discord.Color.red())
-    #e2 = discord.Embed(title="<:broken_circle:847776660174274580> An unexpected error occurred!", description=f"Error details : `{str(error.original)}`\n\nIf this error persists, Please join the support server and report it",color=discord.Color.red())
-    
-    #emoji = bot.get_emoji(847767304707768390)
-    
-    #def check(i):
-      #return i.component.label == "View Details" 
-    
-    #if ctx.author.id == 333147019378032640:
-      #await ctx.send(str(error.original)) 
-    
-    #else:
-      #m = await ctx.send(embed=e,components=[[Button(style=4,label="View Details"),Button(style=5,emoji=emoji,label="Support Server",url="https://discord.gg/yqgQbV5TMv")]])
-      #try:
-        #interaction = await bot.wait_for("button_click", check = check,timeout=20.0)
-        #link= await ctx.channel.create_invite(max_age = 0)
-    
-        #await bot.get_channel(848448665646399488).send(f"an error occurred in **{ctx.guild} ({ctx.guild.id})**\n\n executing command **__{ctx.command.name}__** by {ctx.author.name} ({ctx.author.id}) \n\nError: *{str(error.original)}* \n\n__Invite__ {link}")
-       # await interaction.respond(content = f"<a:success:859413830949535765> error reported successfully", ephemeral=False)
-       # await m.edit(embed=e2,components=[Button(style=5,emoji=emoji ,label="Support server",url="https://discord.gg/yqgQbV5TMv")])
   
-      #except asyncio.TimeoutError:
-     #   await m.edit(components=[Button(style=5,emoji=emoji ,label="Support server",url="https://discord.gg/yqgQbV5TMv")])
-      
-  #elif isinstance(error, commands.MissingRequiredArgument):
-    #await ctx.send_help(ctx.command)
 
-@bot.command(hidden=True)
-@commands.is_owner()
-async def load(ctx, extension):
-  try:
-    bot.load_extension(f'cogs.{extension}')
-    await ctx.send(f'Succesfully loaded **{extension}** module')
-  except Exception as e:
-    await ctx.send(e)
     
-@bot.command(hidden=True)
-@commands.is_owner()
-async def unload(ctx, extension):
-   bot.unload_extension(f'cogs.{extension}')
-   await ctx.send(f'Succesfully unloaded **{extension}** module')
 
-@bot.slash_command(name="Reload", description="Reaload a cog file")
-@commands.is_owner()
-async def _reload(interaction, cog: str = SlashOption(name="cog", description="Provide a cog name", required=True)):
-  try: 
-    bot.reload_extension(f'cogs.{cog}')
-    await ctx.send(content=f'🔃 Succesfully reloaded **{cog}** module')
-  except nextcord_slash.error.CheckFailure as e:
-    await interaction.response.send_message(f"{e} Only the bot dev can execute this command")
 
-async def startup():
-    for filename in os.listdir('./cogs'):
-        if filename.endswith('.py') and not filename.startswith("_"):
-            try:
-                bot.load_extension(f'cogs.{filename[:-3]}')
-                print(f'Loaded {filename[:-3]}')
-            except Exception as e:
-                print(f'Faield to load {filename[:-3]} due to {e}')
+   
+bot.run(config.token)
 
-    bot.load_extension("jishaku")
-
-    status_change.before_loop(bot.wait_until_ready)
-    status_change.start()
-
-    bot.developers = config.developers
-    bot.owner_ids = config.owners
-    bot.topgg_token = config.topgg_token
-    bot.translator = Translator()
-
-    async with aiohttp.CilentSession as session:
-        bot.session = session
-        bot.run(config.token)
-
-asyncio.run(startup())
