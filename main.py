@@ -19,8 +19,10 @@ bot = commands.Bot(
     case_insensitive=True,
     intents=intents
     )
+
 bot.remove_command("help")
-#bot = Client()
+
+
 @tasks.loop(seconds=30)
 async def status_change():
     await bot.change_presence(activity=nextcord.Activity(type=nextcord.ActivityType.watching, name=(f"{len(bot.users)} members | {len(bot.guilds)} servers")))     
@@ -60,6 +62,10 @@ for filename in os.listdir('./cogs'):
                 print(f'Loaded {filename[:-3]}')
             except Exception as e:
                 print(f'Faield to load {filename[:-3]} due to {e}')
+
+bot.developers = config.developers
+bot.owner_ids = config.owners
+bot.topgg_token = config.topgg_token
 
 @bot.slash_command(name="help", description="View the help page")
 async def help(interaction , args=SlashOption(name="args", description="Provide a module/command name",required=False)):
