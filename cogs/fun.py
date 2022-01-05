@@ -1,5 +1,5 @@
 import random
-import discord
+import nextcord
 import secrets
 import asyncio
 import aiohttp
@@ -8,20 +8,16 @@ import requests
 from aiohttp import ClientSession
 from textwrap import TextWrapper
 import os
-from discord.ext.commands import clean_content
+from nextcord.ext.commands import clean_content
 from io import BytesIO
-from discord.ext import commands
-import discord_slash
-from discord_slash.utils.manage_commands import create_option
-
-from discord_components import DiscordComponents, Button
-from discord_slash import cog_ext, SlashContext
+from nextcord.ext import commands
+t cog_ext, SlashContext
 
 class fun(commands.Cog):
     def __init__(self, bot):
       self.bot = bot
     
-    @cog_ext.cog_slash(name="Nitro", description="Free nitro?")
+    @nextcord.slash_command(name="Nitro", description="Free nitro?")
     async def nitro(self,ctx):
       m = random.randint(5,48)
       e = discord.Embed(title="A WILD GIFT APPEARS!", description=f"**NITRO**\nExpires in {m} hours")
@@ -35,33 +31,33 @@ class fun(commands.Cog):
       except:
         return
 
-    @cog_ext.cog_slash(name="kiss", description="kiss a user",options=[create_option(name="user", description="Mention the user you want to kiss",option_type=6,required=True)])
+    @nextcord.slash_command(name="kiss", description="kiss a user")
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def kiss(self, ctx, user):
-      """virtually Kiss the mentioned user"""
+    async def kiss(self, int : Interaction, user=SlashOption(name="user", description="Mention a user to kiss", required=True):
+
         
       Kiss_api = 'https://nekos.life/api/v2/img/kiss'
       parameter = dict()
       resp = requests.get(url=Kiss_api, params=parameter)
       data = resp.json()
-      k_embed = discord.Embed(title='Kissi', url=data['url'],color=ctx.author.color, description = f'{ctx.author.mention} kissed  {user.mention}') 
+      k_embed = nextcord.Embed(title='Kissi', url=data['url'],color=int.user.color, description = f'{int.user.mention} kissed  {user.mention}') 
       k_embed.set_image(url=data['url'])
-      k_embed.set_footer(text='Requested by %s' % ctx.author, icon_url=ctx.author.avatar_url)
-      await ctx.send(f"{user.mention}",embed=k_embed)
+      k_embed.set_footer(text='Requested by %s' % int.user, icon_url=int.user.avatar)
+      await int.response.send_message(f"{user.mention}",embed=k_embed)
     
-    @cog_ext.cog_slash(name="blush", description="Blush at someone or just blush",options=[create_option(name="user", description="Mention the user you want to blush at",option_type=6,required=False)])
+    @nextcord.slash_command(name="blush", description="Blush at someone or just blush")
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def blush(self, ctx, user = None):
-        if not user:  # if member is no mentioned
+    async def blush(self, int: Interaction, user = SlashOption(name="user", description="Mention a user to kiss", required=True)):
+       
           lick_api = 'https://waifu.pics/api/sfw/blush'
           parameter = dict()
           resp = requests.get(url=lick_api, params=parameter)
           data = resp.json()
-          waifu_embed = discord.Embed(title='Blushy', url=data['url'], color=ctx.author.color, description = f'**{ctx.author}** is blushing')
+          waifu_embed = nextcord.Embed(title='Blushy', url=data['url'], color=int.user.color, description = f'**{int.user}** is blushing')
           waifu_embed.set_image(url=data['url'])
-          waifu_embed.set_footer(text='Requested by %s' % ctx.author, icon_url=ctx.author.avatar_url)
-          await ctx.send(embed=waifu_embed)  
-        elif user.id == ctx.author.id:
+          waifu_embed.set_footer(text='Requested by %s' % int.user, icon_url=int.user.avatar)
+          await int.response.send_message(embed=waifu_embed)  
+        elif user.id == int.author.id:
           await ctx.send("You blushed at yourself :flushed: , mention a user next time ")
         else:
           """blush or blush at someone"""
@@ -69,10 +65,10 @@ class fun(commands.Cog):
           parameter = dict()
           resp = requests.get(url=lick_api, params=parameter)
           data = resp.json()
-          waifu_embed = discord.Embed(title='Blushy', url=data['url'], color=ctx.author.color, description = f'**{ctx.message.author} is blushed at {user.name}**')
+          waifu_embed = nextcord.Embed(title='Blushy', url=data['url'], color=int.user.color, description = f'**{int.user} is blushed at {user.name}**')
           waifu_embed.set_image(url=data['url'])
-          waifu_embed.set_footer(text='Requested by %s' % ctx.author, icon_url=ctx.author.avatar_url)
-          await ctx.send(embed=waifu_embed)  
+          waifu_embed.set_footer(text='Requested by %s' % int.user, icon_url=int.user.avatar)
+          await int.response.send_message(embed=waifu_embed)  
 
     @cog_ext.cog_slash(name="Cry")
     @commands.cooldown(1, 5, commands.BucketType.user)
