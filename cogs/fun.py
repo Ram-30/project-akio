@@ -11,7 +11,7 @@ import os
 from nextcord.ext.commands import clean_content
 from io import BytesIO
 from nextcord.ext import commands
-t cog_ext, SlashContext
+
 
 class fun(commands.Cog):
     def __init__(self, bot):
