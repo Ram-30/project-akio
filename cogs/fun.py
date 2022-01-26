@@ -70,18 +70,18 @@ class fun(commands.Cog):
           waifu_embed.set_footer(text='Requested by %s' % int.user, icon_url=int.user.avatar)
           await int.response.send_message(embed=waifu_embed)  
 
-    @cog_ext.cog_slash(name="Cry")
+    @nextcord.slash_command(name="Cry", description="Cry?")
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def cry(self, ctx):
+    async def cry(self, int ):
           """cry?"""
           lick_api = 'https://waifu.pics/api/sfw/cry'
           parameter = dict()
           resp = requests.get(url=lick_api, params=parameter)
           data = resp.json()
-          waifu_embed = discord.Embed(title='Waaaaaaaaaaa', url=data['url'], color=ctx.author.color, description = f'**{ctx.author}** cries')
+          waifu_embed = discord.Embed(title='Waaaaaaaaaaa', url=data['url'], color=int.user.color, description = f'**{int.user}** cries')
           waifu_embed.set_image(url=data['url'])
-          waifu_embed.set_footer(text='Requested by %s' % ctx.author, icon_url=ctx.author.avatar_url)
-          await ctx.send(embed=waifu_embed) 
+          waifu_embed.set_footer(text='Requested by %s' % int.user, icon_url=int.user.avatar)
+          await int.response.send_message(embed=waifu_embed) 
      
     @cog_ext.cog_slash(name="Poke", description="Poke a user",options=[create_option(name="user", description="Mention the user you want to poke",option_type=6,required=True)]) 
     @commands.cooldown(1, 5, commands.BucketType.user)
