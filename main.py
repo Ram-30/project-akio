@@ -1,31 +1,30 @@
-from nextcord.ext import commands
-from nextcord.ext import tasks
-from nextcord import Client, Interaction, SlashOption
-
+from discord import commands
+from discord import tasks
+from discord import Client, Interaction, SlashOption
+import aiohttp
 import config
-
+import keep_alive
 import os
-import nextcord
+import discord
 import asyncio
 import psutil
 from googletrans import Translator
 import json 
 
-intents = nextcord.Intents.default()
+intents = discord.Intents.default()
 intents.members = True
-        
-bot = commands.Bot(
-    command_prefix=">",
-    case_insensitive=True,
-    intents=intents
-    )
-bot.remove_command("help")
 
+
+        
+bot = commands.Bot(case_insensitive=True,intents=intents)
+bot.remove_command("help")
+#bot = Client()
 @tasks.loop(seconds=30)
 async def status_change():
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=(f"{len(bot.users)} members | {len(bot.guilds)} servers")))     
-    await asyncio.sleep(30)
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening,name=(">help")))
+    #await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=(f"{len(bot.users)} members | {len(bot.guilds)} servers")))     
+  await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening,name=("will be back soon")))
+  await asyncio.sleep(30)
+  await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening,name=("/help")))
 
 @bot.event 
 async def on_ready():
@@ -36,8 +35,8 @@ async def on_message(message):
     if bot.user in message.mentions:
         return await message.channel.send(f"Hello I am Akio :wave: You can use my commands through slash commands.")
 
-    elif message.content.startswith(">") and message.author.bot:
-        embed = nextcord.Embed(
+    elif message.content.startswith(">") and not message.author.bot:
+        embed = discord.Embed(
             title="Hello there, Trying to use commands?",
             description="""
             Akio was recently migrated to slash commands!
@@ -47,47 +46,21 @@ async def on_message(message):
             Make sure to reinvite the bot by [clicking here](https://discord.com/oauth2/authorize?client_id=732119152885497867&permissions=8&scope=applications.commands%20bot)
 
             Need help? Join the support server by [clicking here](https://discord.gg/TbhN3ye9cC)]""",
-            color=nextcord.Color.blurple())
+            color=discord.Color.blurple())
 
         embed.set_footer(text="Akio development team", icon_url= bot.user.avatar.url)
-        return await ctx.send(embed=embed)
-    await bot.process_commands(message) 
+        
+        await bot.process_commands(message) 
+        return await  message.channel.send(embed=embed)
 
-@slash.slash(
-    name="translate",
-    description="Translate something (beta)",
-    options=
-        [
-            create_option(
-                name="to",
-                description="Translate to which language",
-                option_type=3, 
-                required=True
-            ),
-            create_option(
-                name="message",
-                description="text to translate",
-                option_type=3,
-                required=True
-            )
-        ]
-    )
-async def translate(ctx,to , message:str):
-  t = Translator()
-  a = t.translate(text=message,dest=to)
-  await ctx.send(a.text)
 
-@slash.slash(name="help", description="View the help page",options=[create_option(name="args", description="Module name",option_type=3 ,required=False)])
-async def help(ctx, args=None):
+@bot.slash_command(name="help", description="View the help page")
+async def help(interaction ,args: int = SlashOption(name="modules",description='select a module',choices={"moderation": 1, "fun": 2, "utility": 3,"info":4},required=False),):
   help_embed = discord.Embed(title="Akio help command", color = 0x69EBE4)
-  #command_names_list 
-  for _command in bot.slash.commands:
-    if _command == 'context':
-      continue
-    command_names_list = bot.slash.commands[_command]
-  #[x.name for x in bot.slash.commands]
+ # command_names_list = discord.get_all_application_commands()
 
-    # If there are no arguments, just list the commands:
+
+    # If there   no arguments, just list the commands:
   if not args:
     help_embed= discord.Embed(description=(f"[Invite me](https://discord.com/api/oauth2/authorize?client_id=732119152885497867&permissions=8&scope=bot) | [Support Server](https://discord.gg/5yeY36GnGS) | [Upvote](https://top.gg/bot/732119152885497867/vote)\nAll the modules of the bot are listed below"), color = 0x69EBE4)
     #help_embed.add_field(name="<:music:847767269899370538> Music",value=f"Type **`>help music`**")
@@ -102,7 +75,7 @@ async def help(ctx, args=None):
     
     help_embed.set_footer(text="Akio® | Made by NotGizzy#9481",icon_url="https://media.discordapp.net/attachments/869491746067865611/887991450170687518/20210916_144928.png")
     help_embed.set_thumbnail(url="https://media.discordapp.net/attachments/867648204279513088/887994311218724874/20210916_091654.png")
-    await ctx.send(embed=help_embed)
+    await interaction.response.send_message(embed=help_embed)
  
   #elif args == "music":
     #help_embed.add_field(name="<:play_cyan:847975009342193704> Play",value ="`Request a song and add it to queue`")
@@ -115,9 +88,9 @@ async def help(ctx, args=None):
     #help_embed.add_field(name="<:summon_cyan:847975080848130049> Summon",value ="`Summon the bot to vc`")
     
     #help_embed.set_footer(text=f"Type `>help <command name>` for more details about a command.")
-    #await ctx.send(embed=help_embed)
+    #await interaction.response.send_message(embed=help_embed)
   
-  elif args == "utility":
+  elif args == 3:
     help_embed.add_field(name="<:Snow_info:847853879542022144> ServerInfo",value ="`Get information about the server`")
     help_embed.add_field (name="<:question_mark:848121100387090443> Whois",value ="`Get information about a mentioned user`")
     help_embed.add_field(name="<:ascii:848121059521200128> Ascii",value ="`Make ascii art`")
@@ -131,9 +104,9 @@ async def help(ctx, args=None):
     help_embed.add_field(name="<:embed_add:858614012190785546> embed",value="Interactive embed Creator")
     help_embed.add_field(name="<:magnify_glass:858332516775624704> Role",value ="`Get Information about a role`")
     help_embed.set_footer(text=f"Type `>help <command name>` for more details about a command.")
-    await ctx.send(embed=help_embed)
+    await interaction.response.send_message(embed=help_embed)
   
-  elif args == "fun":
+  elif args == 2:
     help_embed.add_field(name="<:hugie:847962984243265568> Hug",value ="`Give a user virtual hug`")
     help_embed.add_field(name="<:pat:847963024391536660> Pat",value ="`Give a user virtual pat`")
     help_embed.add_field(name="<:kiss_fun:848497004749651998> Kiss",value="`Give a user a virtual kiss`")
@@ -169,9 +142,9 @@ async def help(ctx, args=None):
 
 
     help_embed.set_footer(text=f"Type `>help <command name>` for more details about a command.")
-    await ctx.send(embed=help_embed)
+    await interaction.response.send_message(embed=help_embed)
     
-  elif args == "mod":
+  elif args == 1:
     help_embed.add_field(name="<:nickname:848436062845927435> Nickname",value ="`Change nick of a user`")
     help_embed.add_field(name="<:muted:848436041656434708> Mute",value ="`Mute a user`")
     help_embed.add_field(name="<:umuted:848436114917425162> Unmute",value ="`unmute a muted user`")
@@ -184,9 +157,9 @@ async def help(ctx, args=None):
     help_embed.add_field(name="<:remove_role:848436089088901141> takerole",value ="`Remove a role from user`")
     
     help_embed.set_footer(text=f"Type `>help <command name>` for more details about a command.")
-    await ctx.send(embed=help_embed)
+    await interaction.response.send_message(embed=help_embed)
   
-  elif args == "info":
+  elif args == 4:
     #help_embed.add_field(name="<:xs_prefix:848442391018864650> setprefix",value ="`Change the bot prefix for this server`")
     help_embed.add_field(name="<a:loading:847421396984135680> Stats",value ="`Get bot's current stats`")
     help_embed.add_field(name="<:whats_new:848443104591347742> new",value ="`Get the most recent changelog `")
@@ -198,26 +171,26 @@ async def help(ctx, args=None):
  
     
     help_embed.set_footer(text=f"Type `>help <command name>` for more details about a command.")
-    await ctx.send(embed=help_embed)
+    await interaction.response.send_message(embed=help_embed)
   
   
   
     # If the argument is a command, get the help text from that command:
-  elif args in command_names_list:
-    help_embed.add_field(name="Guide",value="```\n<> = Required arguments\n() = Optional arguments\nDo not include brackets\n```",inline = False)
+  #elif args in command_names_list:
+   # help_embed.add_field(name="Guide",value="```\n<> = Required arguments\n() = Optional arguments\nDo not include brackets\n```",inline = False)
+   # 
+   # help_embed.add_field(
+   # name="Description",
+#value=f"```{bot.get_command(args).help}```",inline=False)
     
-    help_embed.add_field(
-    name="Description",
-    value=f"```{bot.get_command(args).help}```",inline=False)
-    
-    if bot.get_command(args).aliases:
-      help_embed.add_field(
-      name="Aliases",
-      value=f"```{bot.get_command(args).aliases}```")
-    help_embed.add_field(
-    name="Usage",
-    value=f"```>{bot.get_command(args).usage}```")
-    await ctx.send(embed=help_embed,hidden=True)
+   # if bot.get_command(args).aliases:
+   #   help_embed.add_field(
+    #  name="Aliases",
+    ##  value=f"```{bot.get_command(args).aliases}```")
+    #help_embed.add_field(
+   # name="Usage",
+   # value=f"```>{bot.get_command(args).usage}```")
+   # await interaction.response.send_message(embed=help_embed,ephemeral=True)
 
  
     
@@ -236,20 +209,26 @@ async def help(ctx, args=None):
     help_embed.add_field(
     name="No command found",
     value=f"I dont have a command/module named {args}!")
-    await ctx.send(embed=help_embed,hidden=True)
+    await interaction.response.send_message(embed=help_embed,ephemeral=True)
 
+
+@bot.slash_command(name="translate",description="translate any message")
+async def translate(int:Interaction,to=SlashOption(name="to", description="Translate to which language", required=True),message=SlashOption(name="message", description="message to be translated", required=True)):
+  t = Translator()
+  a = t.translate(text=message,dest=to)
+  await int.response.send_message(a.text)
 
 
   
-@slash.slash(name="stats", description="Get the bots stats")
-async def stats(ctx):
+@bot.slash_command(name="stats", description="Get the bots stats")
+async def stats(interaction):
   """Get the current stats of bot"""
   process = psutil.Process(os.getpid())
   embed = discord.Embed(title="Bot info",color=0x69EBE4, description=(f"<:Xarvis_dev:847776388484038696> Developers: **NotGizzy#9481**\n\n<:ONLINE:847786717176135690> Live in: **{len(bot.guilds)} **Servers \n\n<a:loading:847421396984135680> Memory usage: **{round(process.memory_info().rss/1024/1024) *1}** mb! \n\n<:desktop_screen:847785552144629821> Cpu usage: **{psutil.cpu_percent()}**% \n\n<:waves:847767252979154944> Ram usage: **{psutil.virtual_memory().percent}**%\n\n<:latency:847781207999905802> Bot latency: **{round(bot.latency * 1000)}** ms\n\n<:Snow_info:847853879542022144> Version\: `0.4.2`"))
-  embed.set_footer(text="Akio Copyright 2021®",icon_url=ctx.author.avatar_url)
+  embed.set_footer(text="Akio Copyright 2021®",icon_url=interaction.user.avatar)
   embed.set_thumbnail(url="https://media.discordapp.net/attachments/867648204279513088/887994311218724874/20210916_091654.png")
     
-  await ctx.send(embed=embed)
+  await interaction.response.send_message(embed=embed)
   
   
       
@@ -263,82 +242,39 @@ async def on_command_error(ctx, error):
      em = discord.Embed(title = "<:slowmode_time:862601700807933952> Cooldown", description = msg ,colour=0x69EBE4 )
      await ctx.send (embed = em)
   
-  #elif isinstance(error, commands.CommandInvokeError):
-    #if hasattr(ctx.command, 'on_error'):
-      #return
-
-    #e = discord.Embed(title="<:broken_circle:847776660174274580> Beep Boop Beep!", description=f"An unexpected error occurred executing **__{ctx.command.name}__**\n\nIf this issue persists we advise you to report this error",color=discord.Color.red())
-    #e2 = discord.Embed(title="<:broken_circle:847776660174274580> An unexpected error occurred!", description=f"Error details : `{str(error.original)}`\n\nIf this error persists, Please join the support server and report it",color=discord.Color.red())
-    
-    #emoji = bot.get_emoji(847767304707768390)
-    
-    #def check(i):
-      #return i.component.label == "View Details" 
-    
-    #if ctx.author.id == 333147019378032640:
-      #await ctx.send(str(error.original)) 
-    
-    #else:
-      #m = await ctx.send(embed=e,components=[[Button(style=4,label="View Details"),Button(style=5,emoji=emoji,label="Support Server",url="https://discord.gg/yqgQbV5TMv")]])
-      #try:
-        #interaction = await bot.wait_for("button_click", check = check,timeout=20.0)
-        #link= await ctx.channel.create_invite(max_age = 0)
-    
-        #await bot.get_channel(848448665646399488).send(f"an error occurred in **{ctx.guild} ({ctx.guild.id})**\n\n executing command **__{ctx.command.name}__** by {ctx.author.name} ({ctx.author.id}) \n\nError: *{str(error.original)}* \n\n__Invite__ {link}")
-       # await interaction.respond(content = f"<a:success:859413830949535765> error reported successfully", ephemeral=False)
-       # await m.edit(embed=e2,components=[Button(style=5,emoji=emoji ,label="Support server",url="https://discord.gg/yqgQbV5TMv")])
   
-      #except asyncio.TimeoutError:
-     #   await m.edit(components=[Button(style=5,emoji=emoji ,label="Support server",url="https://discord.gg/yqgQbV5TMv")])
-      
-  #elif isinstance(error, commands.MissingRequiredArgument):
-    #await ctx.send_help(ctx.command)
-
-@bot.command(hidden=True)
+@bot.slash_command(name="load", description="load a cog file")
 @commands.is_owner()
-async def load(ctx, extension):
-  try:
-    bot.load_extension(f'cogs.{extension}')
-    await ctx.send(f'Succesfully loaded **{extension}** module')
-  except Exception as e:
-    await ctx.send(e)
+async def load(int, extension=SlashOption (name="extension", description="Provide a cog name", required=True)):
+   bot.load_extension(f'cogs.{extension}')
+   await int.response.send_message(f'Succesfully loaded **{extension}** module')
+
+
     
-@bot.command(hidden=True)
+@bot.slash_command(name="unload", description="unload a cog file")
 @commands.is_owner()
-async def unload(ctx, extension):
+async def unload(int, extension=SlashOption (name="extension", description="Provide a cog name", required=True)):
    bot.unload_extension(f'cogs.{extension}')
-   await ctx.send(f'Succesfully unloaded **{extension}** module')
+   await int.responsex.sen_messaged(f'Succesfully unloaded **{extension}** module')
 
-@slash.slash(name="Reload", description="Reaload a cog file",options=[create_option(name="cog", description="type a cog name",option_type=3,required=True)],guild_ids=dev)
+@bot.slash_command(name="reload", description="Reaload a cog file")
 @commands.is_owner()
-async def _reload(ctx, cog: str):
-  try: 
-    bot.reload_extension(f'cogs.{cog}')
-    await ctx.send(content=f'🔃 Succesfully reloaded **{cog}** module')
-  except discord_slash.error.CheckFailure as e:
-    await ctx.send(f"{e} Only the bot dev can execute this command")
+async def reload(int, cog: str = SlashOption(name="cog", description="Provide a cog name", required=True)):
+  bot.reload_extension(f'cogs.{cog}')
+  await int.response.send_message(content=f'🔃 Succesfully reloaded **{cog}** module')
+  #extcord_slash.error.CheckFailure as e:#
+   # await i#nteraction.response.send_message(f"{e} Only the bot dev can execute this command")
 
-async def startup():
-    for filename in os.listdir('./cogs'):
-        if filename.endswith('.py') and not filename.startswith("_"):
-            try:
-                bot.load_extension(f'cogs.{filename[:-3]}')
-                print(f'Loaded {filename[:-3]}')
-            except Exception as e:
-                print(f'Faield to load {filename[:-3]} due to {e}')
+for filename in os.listdir('./cogs'):
+  if filename.endswith('.py') and not filename.startswith("_"):
+    try:
+      bot.load_extension(f'cogs.{filename[:-3]}')
+      print(f'Loaded {filename[:-3]}')
+    except Exception as e:
+      print(f'Faield to load {filename[:-3]} due to {e}')
+       
 
-    bot.load_extension("jishaku")
+keep_alive.keep_alive()    
+bot.run(os.environ['Token'])
 
-    status_change.before_loop(bot.wait_until_ready)
-    status_change.start()
-
-    bot.developers = config.developers
-    bot.owner_ids = config.owners
-    bot.topgg_token = config.topgg_token
-    bot.translator = Translator()
-
-    async with aiohttp.CilentSession as session:
-        bot.session = session
-        bot.run(config.token)
-
-asyncio.run(startup())
+#asyncio.run(startup())
